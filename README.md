@@ -1,0 +1,2 @@
+# low-inventory-alert
+Restaurants are able to request data exports from Toast which exports a summary of sales to an Amazon S3 bucket every night. By creating an inventory/recipe database (an example of how to format this is provided as InventoryDb) you can use this program to download these reports to your desktop to calculate how much inventory has been gone through at the end of every night. The email_alert.py will be triggered when an ingredient in the database falls below a minimum threshold value set by the user
