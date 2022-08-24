@@ -53,9 +53,8 @@ sql= ("update Ingredient"
       "where i.IngredientId = ix.IngredientId"
       "group by m.MenuItemId, m.Name, i.Name, mii.IngredientId), ix.QuantityAvailable)"
       "from Ingredient ix")
-# 2) SQL database for minimum quantity thresholds
+# 2) database.py connects to and updates Inventory table in SQL database
 
-# 3) Connect to database
-
-# 5) Twilio send email if lower
+# 3) TODO: Implement Twilio API to send SMS 
+# 4) TODO: If Ingredients.QuantityAvailable<Ingredients.MinQuantity, trigger Twilio API to send SMS text alert that item needs to be restocked
 
