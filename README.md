@@ -4,6 +4,7 @@ By creating an inventory/recipe database you can use this program to download th
 
 Done:
 -main.py downloads sales summary AllItemsReport.csv from Toast
+  --example of Toast's AllItemsReport.csv is included (lives in the YYYYMMDD folder in Toast's Amazon S3 bucket)
 -structured InventoryDb is included as 'InventoryDbExample.bacpac')
 -database.py connects to local desktop InventoryDb, SQL statements to import relevant columns from Toast's reports
 
