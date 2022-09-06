@@ -2,7 +2,18 @@ from datetime import datetime, timedelta
 import pyodbc
 import pandas as pd
 from pandasql import sqldf
-pysqldf = lambda q: sqldf(q, globals())
+
+server = 'DESKTOP\SQLEXPRESS'
+database = 'NewInventoryDb'
+
+
+DB = {'servername': server,
+      'database': database}# create the connection
+conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + DB['servername'] + ';DATABASE=' + DB['database'] + ';Trusted_Connection=yes')
+
+
+#conn=pyodbc.connect(f'DRIVER={SQL Server};SERVER='{SQLserver}';DATABASE='{database}';Trusted_Connection=yes')
+#HIDE password
 
 def Yesterday(frmt='%Y-%m-%d', string=True):
     yesterday=datetime.now()-timedelta(1)
@@ -19,43 +30,40 @@ yesterday=remove_hyphens(yesterday)
 #either set date=yesterday or provide a date in YYYYMMDD if you have a specific date you want to download. Toast stores up to 3 weeks worth of files
 date=yesterday
 
-server = 'DESKTOP\SQLEXPRESS'
-database = 'NewInventoryDb'
-username = 'DESKTOP\sabri'
-password = 'itsasecret'
-tcon='y'
-cnxn = pyodbc.connect(driver='{SQL Server}', host=server, database=database,
-                      trusted_connection=tcon, user=username, password=password)
+#
+#
+# if cnxn:
+#     print('True')
+# cursor = cnxn.cursor()
+#
+# def Read(cnxn):
+#     table_name=str(input("What table do you want to read from?"))
+#     print('Read')
+#     cursor.execute(f'SELECT * FROM {table_name}')
+#     for row in cursor:
+#         print(row)
+#     cnxn.commit()
+# #TEST Read
+# #Read(cnxn)
 
-if cnxn:
-    print('True')
-cursor = cnxn.cursor()
 
-def Read(cnxn):
-    table_name=str(input("What table do you want to read from?"))
-    print('Read')
-    cursor.execute(f'SELECT * FROM {table_name}')
-    for row in cursor:
-        print(row)
-    cnxn.commit()
-
-def Insert(cnxn):
-    print('Write')
-    table_name=input('What table do you want to write to?')
-    column_name=input('What column do you want to write to?')
-    entry= input('What do you want to insert?')
-    insert_stmt = (
-        f"INSERT INTO {table_name} ({column_name}) VALUES ({entry})"
-    )
-    cursor.execute(insert_stmt)
-
-    #preview insert statement
-    print('Read')
-    cursor.execute(f'SELECT * FROM {table_name}')
-    for row in cursor:
-        print(row)
-
-    cnxn.commit()
+# def Insert(cnxn):
+#     print('Write')
+#     table_name=input('What table do you want to write to?')
+#     column_name=input('What column do you want to write to?')
+#     entry= input('What do you want to insert?')
+#     insert_stmt = (
+#         f"INSERT INTO {table_name} ({column_name}) VALUES ({entry})"
+#     )
+#     cursor.execute(insert_stmt)
+#
+#     #preview insert statement
+#     print('Read')
+#     cursor.execute(f'SELECT * FROM {table_name}')
+#     for row in cursor:
+#         print(row)
+#
+#     cnxn.commit()
 
 
 #SQL statement to update Ingredient table with new QuantityAvailable with # Orders from AllItemsReport (downloaded from Toast AWS bucket)
@@ -85,15 +93,20 @@ sqlUpdateIngredient= """("update Ingredient"
 # cnxn.commit()
 
 # 2) Import AllItemsReport.csv into a DataFrame TODO:change path to Toast\{date}\AllItemsReport after everything else works
-data= pd.read_csv(rf'C:\Users\sabri\Desktop\Toast\20220801\AllItemsReport.csv')
-df=pd.DataFrame(data)
-df.columns = df.columns.str.replace(' ','')
-df = df.fillna(value=0)
-
+# data= pd.read_csv(rf'C:\Users\sabri\Desktop\Toast\20220801\AllItemsReport.csv')
+#
+# df=pd.DataFrame(data)
+# df.columns = df.columns.str.replace(' ','')
+# df = df.fillna(value=0)
+# print("Print df:")
+# print(df)
 # 3) Create a df Table for AllItemsReport.csv with columns Master ID, Menu Item, Item Qty
-select = """SELECT MenuItem, SUM(ItemQty) as ItemQty
+select = """SELECT MenuItem, SUM([ItemQty]) as ItemQty
 FROM df
 GROUP BY MenuItem;"""
+
+
+
 report = pysqldf(select)
 report=report.fillna(value=0)
 # print({date})
@@ -109,18 +122,18 @@ INSERT INTO [DailyReport] (MenuItem,ItemQty) values(?,?)
 """
 
 testsql="""
-ALTER TABLE DAILY REPORT
-    INSERT INTO (MenuItem,ItemQty) values(?,?) UNIQUE(MenuItem) 
+    INSERT INTO DailyReport (MenuItem,ItemQty) values(?,?) 
 """
 
-for index,row in report.iterrows():
-    newVals = row['MenuItem'], row['ItemQty']
+df = pd.read_sql_query(testsql,conn)
+# for index,row in report.iterrows():
+#     newVals = row['MenuItem'], row['ItemQty']
+#
+#     cursor.execute(testsql,newVals)
 
-    cursor.execute(testsql,newVals)
-
-df.to_sql('AllItemsReport', con=cnxn, if_exists='replace')
+#df.to_sql('AllItemsReport', con=cnxn, if_exists='replace')
 
 
-cnxn.execute(sql)
+cnxn.execute(testsql)
 cnxn.commit()
 cursor.close()
