@@ -6,24 +6,26 @@ from fabric import Connection #ssh
 import pyodbc
 
 
-def Yesterday(frmt='%Y-%m-%d', string=True):
+def Yesterday(frmt='%Y-%m-%d'):
     yesterday=datetime.now()-timedelta(1)
-    if string:
-        return yesterday.strftime(frmt)
+    yesterday=yesterday.strftime(frmt)
     return yesterday
 ## want YYYYMMDD
-yesterday=Yesterday()
 def remove_hyphens(string):
     string=string.replace('-', '')
     return string
-yesterday=remove_hyphens(yesterday)
+    
+yesterday=remove_hyphens(Yesterday())
 
 #either set date=yesterday or provide a date in YYYYMMDD if you have a specific date you want to download. Toast stores up to 3 weeks worth of files
 date=yesterday
 parent_dir = r"C:\Users\sabri\Desktop\Toast"
 path = os.path.join(parent_dir, date)
-os.mkdir(path)
-print("Directory '% s' created" % date)
+if os.path.exists(path) == False:
+    os.mkdir(path)
+    print("Directory '% s' created" % date)
+else:
+    print("Directory '% s' exists" % date)
 
 #Restaurant must enable data exports https://central.toasttab.com/s/article/Enabling-Data-Exports-1492810278449
 #Follow these instructions to generate SSH key pair https://central.toasttab.com/s/article/Automated-Nightly-Data-Export-1492723819691
