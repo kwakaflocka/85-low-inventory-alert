@@ -42,21 +42,8 @@ with pysftp.Connection(host=SERVERNAME, username=USERNAME, private_key=r'C:\User
             #download yesterday's sales reports to a specified desktop folder
         sftp.get_d((f'/{restaurant_id}/{yesterday}'), (r'C:\Users\sabri\Desktop\Toast'))
 
-sql= ("update Ingredient"
-      "set"
-      "QuantityAvailable = ISNULL(QuantityAvailable - (select sum(mii.Quantity * a.[  # Orders]) as QtyOfIngUsed)"
-      "from MenuItem m"
-      "inner join AllItemsReport1 a"
-      "on m.Name = a.[Menu Item]"
-      "inner join MenuItemIngredient mii"
-      "on mii.MenuItemId = m.MenuItemId"
-      "inner join Ingredient i"
-      "on mii.IngredientId = i.IngredientId"
-      "where i.IngredientId = ix.IngredientId"
-      "group by m.MenuItemId, m.Name, i.Name, mii.IngredientId), ix.QuantityAvailable)"
-      "from Ingredient ix")
 # 2) database.py connects to and updates Inventory table in SQL database
 
-# 3) TODO: Implement Twilio API to send SMS 
-# 4) TODO: If Ingredients.QuantityAvailable<Ingredients.MinQuantity, trigger Twilio API to send SMS text alert that item needs to be restocked
+# 3) sendsms.py uses Twilio API to send SMS 
+
 
