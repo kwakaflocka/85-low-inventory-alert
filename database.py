@@ -1,8 +1,10 @@
 import pandas as pd
 from mssql_dataframe import SQLServer
 
+import importweather
 import main
 import sendsms
+import importweather as weather
 
 server = 'LOCALHOST\SQLEXPRESS'
 database = 'NewInventoryDb'
@@ -11,6 +13,8 @@ password='123456'
 sql = SQLServer(database=database, server=server, username=username, password=password, driver='ODBC Driver 17 for SQL Server')
 data=""
 Yesterday=main.yesterday
+w=weather.weatherdata
+
 #import AllItemsReport csv into a dataframe
 def csvtodf():
     path=fr'C:\Users\sabri\Desktop\Toast\{Yesterday}\AllItemsReport.csv'
@@ -22,6 +26,7 @@ def loadsqlfromcsv():
     dailyreports_df = csvtodf()
     #add date column to data frame
     dailyreports_df['Date'] = Yesterday
+
     #delete yesterday's dataloadfromcsv table
     try:
         cursor = sql.connection.cursor()
@@ -63,4 +68,28 @@ loadsqlfromcsv()
 sqlstoredprocedure('ReportItemsUsed')
 sqlstoredprocedure('spUpdateIngredient')
 sqlstoredprocedure('spCheckMin')
+
+# add weather columns to data frame for history_load_csv
+def loadsqlfromcsv():
+    dailyreports_df = csvtodf()
+    #add date column to data frame
+    dailyreports_df['Date'] = Yesterday
+
+    #delete yesterday's dataloadfromcsv table
+    try:
+        cursor = sql.connection.cursor()
+        sqlstr='exec spDel_dataloadfromcsv'
+        cursor.execute(sqlstr)
+        print(f"Deleted {Yesterday} dataloadfromcsv")
+    except:
+        print(f'Try: delete {Yesterday} dataloadfromcsv but did not exist. Creating new dataloadfromcsv')
+        pass
+    print(f"Creating 'dataloadfromcsv' SQL table with {Yesterday}")
+
+#insert weatherdata dataframe from importweather.py into SQL database
+def createtempweathertable():
+    sql.write.update(table_name='tempweatherdataload', dataframe=weather.weatherdata)    #delete yesterday's dataloadfromcsv table
+    sqlstoredprocedure(spUpdateWeather)
+createtempweathertable()
+
 
