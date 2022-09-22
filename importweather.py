@@ -25,13 +25,10 @@ for day,max,min,amax,amin,precip in results:
         weather={"MaxTempF": max,"MinTempF":min,"app_maxF": amax,"app_minF":amin,"precip_sum":precip}
         weatherdata[f'{day}']=weather
 
-print(weatherdata)
-
-#df=pd.DataFrame(json_normalize(weatherdata))
-df =pd.DataFrame.from_dict(weatherdata,orient='columns')
-print(df.head())
 
 
-#results=zip()
+
+weatherdata =pd.DataFrame.from_dict(weatherdata,orient='columns')
+
 
 
